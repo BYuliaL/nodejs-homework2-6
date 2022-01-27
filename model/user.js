@@ -1,5 +1,6 @@
 import pkg from "mongoose";
 import bcrypt from "bcryptjs";
+import gravatar from "gravatar";
 import { Subscription } from "../lib/constants";
 
 const { Schema, model } = pkg;
@@ -35,6 +36,16 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    avatar: {
+      type: String,
+      default: function () {
+        return gravatar.url(this.email, { s: "250" }, true);
+      },
+    },
+    // idAvatarCloud: {
+    //   type: String,
+    //   default: null,
+    // },
   },
   {
     versionKey: false,
