@@ -1,19 +1,43 @@
 import { HttpCode } from "../../lib/constants";
-import AuthService from "../../service/auth";
-const authService = new AuthService();
+import authService from "../../service/auth";
+import {
+  EmailService,
+  SenderNodemailer,
+  SenderSendgrid,
+} from "../../service/email";
 
 const registration = async (req, res, next) => {
-  const { email } = req.body;
-  const isUserExist = await authService.isUserExist(email);
-  if (isUserExist) {
-    return res.status(HttpCode.CONFLICT).json({
-      status: "error",
-      code: HttpCode.CONFLICT,
-      message: "Email in use",
+  try {
+    const { email } = req.body;
+    const isUserExist = await authService.isUserExist(email);
+    if (isUserExist) {
+      return res.status(HttpCode.CONFLICT).json({
+        status: "error",
+        code: HttpCode.CONFLICT,
+        message: "Email is already exist",
+      });
+    }
+    const userData = await authService.create(req.body);
+    const emailService = new EmailService(
+      process.env.NODE_ENV,
+      new SenderNodemailer()
+    );
+
+    const isSend = await emailService.sendVerifyEmail(
+      email,
+      userData.name,
+      userData.verifyTokenEmail
+    );
+    delete userData.verifyTokenEmail;
+
+    res.status(HttpCode.CREATED).json({
+      status: "success",
+      code: HttpCode.CREATED,
+      data: { ...userData, isSendEmailVerify: isSend },
     });
+  } catch (err) {
+    next(err);
   }
-  const data = await authService.create(req.body);
-  res.status(HttpCode.OK).json({ status: "success", code: HttpCode.OK, data });
 };
 
 const login = async (req, res, next) => {
@@ -23,7 +47,7 @@ const login = async (req, res, next) => {
     return res.status(HttpCode.UNAUTHORIZED).json({
       status: "error",
       code: HttpCode.UNAUTHORIZED,
-      message: "Email or password is wrong",
+      message: "Invalid credentials",
     });
   }
   const token = authService.getToken(user);

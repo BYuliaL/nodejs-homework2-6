@@ -1,4 +1,5 @@
 import pkg from "mongoose";
+import { randomUUID } from "crypto";
 import bcrypt from "bcryptjs";
 import gravatar from "gravatar";
 import { Subscription } from "../lib/constants";
@@ -42,10 +43,14 @@ const userSchema = new Schema(
         return gravatar.url(this.email, { s: "250" }, true);
       },
     },
-    // idAvatarCloud: {
-    //   type: String,
-    //   default: null,
-    // },
+    isVerify: {
+      type: Boolean,
+      default: false,
+    },
+    verifyTokenEmail: {
+      type: String,
+      default: randomUUID(),
+    },
   },
   {
     versionKey: false,
