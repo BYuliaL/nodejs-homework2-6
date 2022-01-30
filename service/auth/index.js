@@ -9,20 +9,28 @@ class AuthService {
   }
 
   async create(body) {
-    const { id, name, email, role, avatar } = await Users.create(body);
+    const {
+      id,
+      name,
+      email,
+      role,
+      avatar,
+      verifyTokenEmail,
+    } = await Users.create(body);
     return {
       id,
       name,
       email,
       role,
       avatar,
+      verifyTokenEmail,
     };
   }
 
   async getUser(email, password) {
     const user = await Users.findByEmail(email);
     const isValidPassword = await user?.isValidPassword(password);
-    if (!isValidPassword) {
+    if (!isValidPassword || !user?.isVerify) {
       return null;
     }
     return user;
@@ -31,7 +39,7 @@ class AuthService {
   getToken(user) {
     const { id, email } = user;
     const payload = { id, email };
-    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "8h" });
+    const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "1h" });
     return token;
   }
 
@@ -39,4 +47,5 @@ class AuthService {
     await Users.updateToken(id, token);
   }
 }
-export default AuthService;
+
+export default new AuthService();
