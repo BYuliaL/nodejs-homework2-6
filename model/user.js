@@ -43,10 +43,7 @@ const userSchema = new Schema(
         return gravatar.url(this.email, { s: "250" }, true);
       },
     },
-    isVerify: {
-      type: Boolean,
-      default: false,
-    },
+    isVerify: { type: Boolean, default: false },
     verifyTokenEmail: {
       type: String,
       default: randomUUID(),

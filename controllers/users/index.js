@@ -1,15 +1,16 @@
 /* eslint-disable no-unused-vars */
-import { HttpCode } from "../../lib/constants";
+import repositoryContacts from "../../repository/contacts";
 import repositoryUsers from "../../repository/users";
+import { HttpCode } from "../../lib/constants";
 import {
   UploadFileService,
   LocalFileStorage,
-  // CloudFileStorage,
 } from "../../service/file-storage";
+
 import {
   EmailService,
-  SenderSendgrid,
   SenderNodemailer,
+  SenderSendgrid,
 } from "../../service/email";
 
 const uploadAvatar = async (req, res, next) => {
@@ -56,7 +57,7 @@ const repeatEmailForVerifyUser = async (req, res, next) => {
     const { email, name, verifyTokenEmail } = user;
     const emailService = new EmailService(
       process.env.NODE_ENV,
-      new SenderNodemailer()
+      new SenderSendgrid()
     );
 
     const isSend = await emailService.sendVerifyEmail(
